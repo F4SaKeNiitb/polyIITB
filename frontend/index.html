@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PolyIITB - Trade on the outcomes of real-world events">
+    <title>PolyIITB - Prediction Markets</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+
+<body>
+    <!-- Disclaimer Banner -->
+    <div class="disclaimer-banner">
+        ⚠️ <strong>For Entertainment Only</strong> — Coins are virtual and cannot be exchanged for real currency. This
+        platform is for fun and speculation only.
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <span class="logo-icon">◈</span>
+                <span class="logo-text">PolyIITB</span>
+            </a>
+            <div class="nav-links">
+                <a href="#markets" class="nav-link">Markets</a>
+                <a href="#portfolio" class="nav-link" id="nav-portfolio" style="display: none;">Portfolio</a>
+            </div>
+            <div class="nav-auth" id="nav-auth">
+                <button class="btn btn-outline" onclick="showAuthModal('login')">Login</button>
+                <button class="btn btn-primary" onclick="showAuthModal('register')">Sign Up</button>
+            </div>
+            <div class="nav-user" id="nav-user" style="display: none;">
+                <div class="user-balance">
+                    <span class="balance-label">Balance</span>
+                    <span class="balance-amount" id="user-balance">🪙 0</span>
+                </div>
+                <div class="user-dropdown">
+                    <button class="user-btn" id="user-btn">
+                        <span class="user-avatar" id="user-avatar">U</span>
+                        <span class="user-name" id="user-name">User</span>
+                    </button>
+                    <div class="dropdown-menu" id="dropdown-menu">
+                        <a href="#portfolio" class="dropdown-item">Portfolio</a>
+                        <a href="/static/admin.html" class="dropdown-item" id="admin-link" style="display: none;">Admin
+                            Panel</a>
+                        <a href="#" class="dropdown-item" onclick="logout(); return false;">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                Trade on <span class="gradient-text">Real-World Events</span>
+            </h1>
+            <p class="hero-subtitle">
+                Predict outcomes. Trade positions. Win big.
+            </p>
+            <div class="hero-stats">
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-markets">0</span>
+                    <span class="stat-label">Active Markets</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="stat-volume">$0</span>
+                    <span class="stat-label">Total Volume</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-bg"></div>
+    </section>
+
+    <!-- Markets Section -->
+    <section class="markets-section" id="markets">
+        <div class="section-header">
+            <h2 class="section-title">Popular Markets</h2>
+            <div class="header-actions">
+                <div class="category-filters">
+                    <button class="filter-btn active" data-category="all">All</button>
+                    <button class="filter-btn" data-category="crypto">Crypto</button>
+                    <button class="filter-btn" data-category="sports">Sports</button>
+                    <button class="filter-btn" data-category="politics">Politics</button>
+                    <button class="filter-btn" data-category="science">Science</button>
+                    <button class="filter-btn" data-category="entertainment">Entertainment</button>
+                </div>
+                <button class="btn btn-primary" id="create-market-btn" onclick="showCreateMarketModal()"
+                    style="display: none;">+ Create Market</button>
+            </div>
+        </div>
+        <div class="markets-grid" id="markets-grid">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading markets...</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Portfolio Section -->
+    <section class="portfolio-section" id="portfolio" style="display: none;">
+        <div class="section-header">
+            <h2 class="section-title">Your Portfolio</h2>
+        </div>
+        <div class="portfolio-summary" id="portfolio-summary">
+            <div class="summary-card">
+                <span class="summary-label">Cash Balance</span>
+                <span class="summary-value" id="portfolio-balance">$0.00</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Total Invested</span>
+                <span class="summary-value" id="portfolio-invested">$0.00</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Current Value</span>
+                <span class="summary-value" id="portfolio-value">$0.00</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-label">Profit/Loss</span>
+                <span class="summary-value" id="portfolio-pnl">$0.00</span>
+            </div>
+        </div>
+        <h3 class="subsection-title">Your Positions</h3>
+        <div class="positions-grid" id="positions-grid">
+            <p class="empty-state">No positions yet. Start trading!</p>
+        </div>
+    </section>
+
+    <!-- Market Detail Modal -->
+    <div class="modal" id="market-modal">
+        <div class="modal-overlay" onclick="closeMarketModal()"></div>
+        <div class="modal-content market-modal-content">
+            <button class="modal-close" onclick="closeMarketModal()">×</button>
+            <div class="market-detail" id="market-detail">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal" id="auth-modal">
+        <div class="modal-overlay" onclick="closeAuthModal()"></div>
+        <div class="modal-content auth-modal-content">
+            <button class="modal-close" onclick="closeAuthModal()">×</button>
+            <div class="auth-container">
+                <div class="auth-header">
+                    <h2 class="auth-title" id="auth-title">Login</h2>
+                    <p class="auth-subtitle" id="auth-subtitle">Welcome back to PolyIITB</p>
+                </div>
+                <form id="auth-form" onsubmit="handleAuth(event)">
+                    <div class="form-group" id="username-group" style="display: none;">
+                        <label for="auth-username">Username</label>
+                        <input type="text" id="auth-username" name="username" placeholder="Choose a username">
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-email">Email</label>
+                        <input type="email" id="auth-email" name="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="auth-password">Password</label>
+                        <input type="password" id="auth-password" name="password" placeholder="Enter your password"
+                            required>
+                    </div>
+                    <div class="form-error" id="auth-error"></div>
+                    <button type="submit" class="btn btn-primary btn-full" id="auth-submit">Login</button>
+                </form>
+                <div class="auth-switch">
+                    <span id="auth-switch-text">Don't have an account?</span>
+                    <a href="#" id="auth-switch-link" onclick="toggleAuthMode(); return false;">Sign up</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Market Modal -->
+    <div class="modal" id="create-market-modal">
+        <div class="modal-overlay" onclick="closeCreateMarketModal()"></div>
+        <div class="modal-content auth-modal-content" style="width: 500px;">
+            <button class="modal-close" onclick="closeCreateMarketModal()">×</button>
+            <div class="auth-container">
+                <div class="auth-header">
+                    <h2 class="auth-title">Propose a Market</h2>
+                    <p class="auth-subtitle">Submit for admin review</p>
+                </div>
+                <form id="create-market-form" onsubmit="handleCreateMarket(event)">
+                    <div class="form-group">
+                        <label for="market-title">Question * (min 10 chars)</label>
+                        <input type="text" id="market-title" placeholder="Will X happen by Y date?" required
+                            maxlength="200" minlength="10">
+                    </div>
+                    <div class="form-group">
+                        <label for="market-description">Description</label>
+                        <textarea id="market-description" placeholder="Explain the resolution criteria..." rows="3"
+                            style="width: 100%; padding: var(--space-md); background: var(--bg-glass); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary); font-family: inherit; resize: vertical;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="market-category">Category *</label>
+                        <select id="market-category" required
+                            style="width: 100%; padding: var(--space-md); background: var(--bg-glass); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary);">
+                            <option value="">Select category</option>
+                            <option value="crypto">Crypto</option>
+                            <option value="sports">Sports</option>
+                            <option value="politics">Politics</option>
+                            <option value="science">Science</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="business">Business</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="market-resolution-date">Resolution Date *</label>
+                        <input type="date" id="market-resolution-date" required
+                            style="width: 100%; padding: var(--space-md); background: var(--bg-glass); border: 1px solid var(--border-color); border-radius: var(--radius-md); color: var(--text-primary);">
+                    </div>
+                    <div class="form-error" id="create-market-error"></div>
+                    <button type="submit" class="btn btn-primary btn-full" id="create-market-submit">Submit
+                        Proposal</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Onboarding Carousel Modal -->
+    <div class="modal" id="onboarding-modal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content onboarding-modal-content">
+            <div class="onboarding-carousel" id="onboarding-carousel">
+                <!-- Slide 1 -->
+                <div class="onboarding-slide active" data-slide="0">
+                    <div class="onboarding-icon">🎯</div>
+                    <h2>Welcome to PolyIITB!</h2>
+                    <p>Trade on the outcomes of real-world events using virtual coins. Predict correctly and earn big!
+                    </p>
+                </div>
+                <!-- Slide 2 -->
+                <div class="onboarding-slide" data-slide="1">
+                    <div class="onboarding-icon">🪙</div>
+                    <h2>Your Virtual Currency</h2>
+                    <p>Start with <strong>10,000 coins</strong>! Use them to buy YES or NO shares on prediction markets.
+                        <br><em style="color: var(--warning);">⚠️ Coins are for fun only — not real money!</em>
+                    </p>
+                </div>
+                <!-- Slide 3 -->
+                <div class="onboarding-slide" data-slide="2">
+                    <div class="onboarding-icon">📈</div>
+                    <h2>How Trading Works</h2>
+                    <p>Buy <span style="color: var(--yes-color)">YES</span> if you think an event will happen.
+                        Buy <span style="color: var(--no-color)">NO</span> if you think it won't.
+                        Sell anytime at market price!</p>
+                </div>
+                <!-- Slide 4 -->
+                <div class="onboarding-slide" data-slide="3">
+                    <div class="onboarding-icon">👥</div>
+                    <h2>Refer Friends, Earn More!</h2>
+                    <p>Share your referral code with friends. When they sign up, you both get <strong>10,000 bonus
+                            coins</strong>!</p>
+                </div>
+            </div>
+            <div class="onboarding-dots" id="onboarding-dots">
+                <span class="dot active" data-slide="0"></span>
+                <span class="dot" data-slide="1"></span>
+                <span class="dot" data-slide="2"></span>
+                <span class="dot" data-slide="3"></span>
+            </div>
+            <div class="onboarding-buttons">
+                <button class="btn btn-outline" onclick="skipOnboarding()">Skip</button>
+                <button class="btn btn-primary" id="onboarding-next" onclick="nextOnboardingSlide()">Next</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>© 2026 PolyIITB</p>
+            <p class="footer-disclaimer">⚠️ This platform is for entertainment and educational purposes only. Coins are
+                virtual and have no real-world monetary value. Do not use this platform for actual gambling.</p>
+        </div>
+    </footer>
+
+    <script src="/static/js/auth.js"></script>
+    <script src="/static/js/markets.js"></script>
+    <script src="/static/js/trading.js"></script>
+    <script src="/static/js/onboarding.js"></script>
+    <script src="/static/js/main.js"></script>
+</body>
+
+</html>

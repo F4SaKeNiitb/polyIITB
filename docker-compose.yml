@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: polyiitb
+      POSTGRES_PASSWORD: polyiitb_secret_123
+      POSTGRES_DB: polyiitb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U polyiitb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Backend + Frontend App
+  app:
+    build: .
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://polyiitb:polyiitb_secret_123@db:5432/polyiitb
+      - SECRET_KEY=your-production-secret-key-change-this-in-production
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
