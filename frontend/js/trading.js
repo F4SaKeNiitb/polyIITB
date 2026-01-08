@@ -153,12 +153,12 @@ async function loadPortfolio() {
         if (summaryResponse.ok) {
             const summary = await summaryResponse.json();
 
-            document.getElementById('portfolio-balance').textContent = `🪙${Math.round(summary.balance * 100).toLocaleString()}`;
-            document.getElementById('portfolio-invested').textContent = `🪙${Math.round(summary.total_invested * 100).toLocaleString()}`;
-            document.getElementById('portfolio-value').textContent = `🪙${Math.round(summary.current_value * 100).toLocaleString()}`;
+            document.getElementById('portfolio-balance').textContent = `🪙${summary.balance.toLocaleString()}`;
+            document.getElementById('portfolio-invested').textContent = `🪙${Math.round(summary.total_invested).toLocaleString()}`;
+            document.getElementById('portfolio-value').textContent = `🪙${Math.round(summary.current_value).toLocaleString()}`;
 
             const pnlEl = document.getElementById('portfolio-pnl');
-            const pnlCoins = Math.round(summary.profit_loss * 100);
+            const pnlCoins = Math.round(summary.profit_loss);
             const pnlText = `${pnlCoins >= 0 ? '+' : ''}🪙${pnlCoins.toLocaleString()}`;
             const pnlPct = summary.profit_loss_pct ? ` (${summary.profit_loss_pct >= 0 ? '+' : ''}${summary.profit_loss_pct.toFixed(1)}%)` : '';
             pnlEl.textContent = pnlText + pnlPct;

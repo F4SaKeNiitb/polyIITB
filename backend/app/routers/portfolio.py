@@ -89,25 +89,25 @@ async def get_portfolio_summary(
             if pos.yes_shares > 0 or pos.no_shares > 0:
                 active_positions += 1
                 
-                # Calculate value based on current market prices
-                yes_value = pos.yes_shares * pos.market.yes_price
-                no_value = pos.no_shares * pos.market.no_price
+                # Calculate value based on current market prices (in coins: shares * price * 100)
+                yes_value = pos.yes_shares * pos.market.yes_price * 100
+                no_value = pos.no_shares * pos.market.no_price * 100
                 current_value += yes_value + no_value
                 
-                # Calculate invested amount based on average purchase price
-                yes_invested = pos.yes_shares * pos.avg_yes_price
-                no_invested = pos.no_shares * pos.avg_no_price
+                # Calculate invested amount based on average purchase price (in coins)
+                yes_invested = pos.yes_shares * pos.avg_yes_price * 100
+                no_invested = pos.no_shares * pos.avg_no_price * 100
                 total_invested += yes_invested + no_invested
     
     profit_loss = current_value - total_invested
     profit_loss_pct = (profit_loss / total_invested * 100) if total_invested > 0 else 0
     
     return {
-        "balance": round(current_user.balance, 2),
-        "total_invested": round(total_invested, 2),
-        "current_value": round(current_value, 2),
-        "profit_loss": round(profit_loss, 2),
+        "balance": int(current_user.balance),  # Already in coins
+        "total_invested": int(round(total_invested)),  # Now in coins
+        "current_value": int(round(current_value)),  # Now in coins
+        "profit_loss": int(round(profit_loss)),  # Now in coins
         "profit_loss_pct": round(profit_loss_pct, 2),
         "total_positions": active_positions,
-        "total_equity": round(current_user.balance + current_value, 2)
+        "total_equity": int(round(current_user.balance + current_value))  # Now in coins
     }
