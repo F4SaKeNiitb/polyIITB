@@ -352,7 +352,7 @@ async function handleCreateMarket(event) {
         }
 
         closeCreateMarketModal();
-        showToast('✅ Market proposal submitted! Awaiting admin approval.', 'success');
+        showToast('Market proposal submitted! Awaiting admin approval.', 'success');
 
     } catch (error) {
         errorEl.textContent = error.message;

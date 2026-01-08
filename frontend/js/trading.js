@@ -201,13 +201,13 @@ function renderPositions(positions) {
                 ${pos.no_shares > 0 ? `
                     <div class="share-info">
                         <span class="share-label">No Shares</span>
-                        <span class="share-value no">${pos.no_shares} @ ${(pos.avg_no_price * 100).toFixed(0)}¢</span>
+                        <span class="share-value no">${pos.no_shares} @ ${(pos.avg_no_price * 100).toFixed(0)} coins</span>
                     </div>
                 ` : ''}
             </div>
             <div style="display: flex; gap: var(--space-md); margin-top: var(--space-md);">
                 <span style="color: var(--text-muted); font-size: 0.875rem;">
-                    Current: Yes ${(pos.current_yes_price * 100).toFixed(0)}¢ / No ${(pos.current_no_price * 100).toFixed(0)}¢
+                    Current: Yes ${(pos.current_yes_price * 100).toFixed(0)} coins / No ${(pos.current_no_price * 100).toFixed(0)} coins
                 </span>
             </div>
         </div>

@@ -78,16 +78,16 @@ class TradingEngine:
                 select(Market).where(Market.id == market.id).with_for_update()
             ).scalar_one()
             
-            # Calculate cost using current price
+            # Calculate cost using current price (in coins: price * quantity * 100)
             current_price = locked_market.yes_price if side == "yes" else locked_market.no_price
-            total_cost = current_price * quantity
+            total_cost = int(round(current_price * quantity * 100))  # Cost in coins
             
-            # Check if user has enough balance
+            # Check if user has enough balance (balance is in coins)
             if locked_user.balance < total_cost:
-                return None, f"Insufficient balance. Need ${total_cost:.2f}, have ${locked_user.balance:.2f}"
+                return None, f"Insufficient balance. Need 🪙{total_cost}, have 🪙{locked_user.balance}"
             
-            # Update user balance
-            locked_user.balance -= total_cost
+            # Update user balance (ensure it stays as integer)
+            locked_user.balance = int(locked_user.balance - total_cost)
             
             # Update market prices with improved impact formula
             if side == "yes":
@@ -206,12 +206,12 @@ class TradingEngine:
             if shares_held < quantity:
                 return None, f"Insufficient shares. You have {shares_held} shares."
             
-            # Calculate payout at current price
+            # Calculate payout at current price (in coins: price * quantity * 100)
             current_price = locked_market.yes_price if side == "yes" else locked_market.no_price
-            total_payout = current_price * quantity
+            total_payout = int(round(current_price * quantity * 100))  # Payout in coins
             
-            # Update user balance
-            locked_user.balance += total_payout
+            # Update user balance (ensure it stays as integer)
+            locked_user.balance = int(locked_user.balance + total_payout)
             
             # Update market prices (inverse of buy - selling reduces price)
             if side == "yes":

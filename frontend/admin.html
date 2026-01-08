@@ -131,7 +131,7 @@
 
     <script src="/static/js/auth.js"></script>
     <script>
-        const API_BASE = '/api';
+        // API_BASE is already defined in auth.js
 
         async function loadPendingProposals() {
             const container = document.getElementById('proposals-list');
@@ -162,15 +162,41 @@
                                 by ${escapeHtml(p.username)} • ${new Date(p.created_at).toLocaleDateString()}
                             </span>
                         </div>
-                        <h3 class="proposal-title">${escapeHtml(p.title)}</h3>
-                        <div class="proposal-meta">
-                            <strong>Category:</strong> ${escapeHtml(p.category)} • 
-                            <strong>Resolution:</strong> ${new Date(p.resolution_date).toLocaleDateString()}
+                        
+                        <div style="margin-bottom: var(--space-md);">
+                            <label style="color: var(--text-muted); font-size: 0.75rem;">Title (editable)</label>
+                            <input type="text" class="admin-notes-input" id="title-${p.id}" value="${escapeHtml(p.title)}" style="margin-bottom: 0;">
                         </div>
-                        ${p.description ? `<p class="proposal-description">${escapeHtml(p.description)}</p>` : ''}
-                        <input type="text" class="admin-notes-input" id="notes-${p.id}" placeholder="Admin notes (optional, shown to user if rejected)">
+                        
+                        <div style="margin-bottom: var(--space-md);">
+                            <label style="color: var(--text-muted); font-size: 0.75rem;">Description (editable)</label>
+                            <textarea class="admin-notes-input" id="desc-${p.id}" rows="2" style="margin-bottom: 0; resize: vertical;">${escapeHtml(p.description || '')}</textarea>
+                        </div>
+                        
+                        <div style="display: flex; gap: var(--space-md); margin-bottom: var(--space-md); flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="color: var(--text-muted); font-size: 0.75rem;">Category</label>
+                                <select class="admin-notes-input" id="category-${p.id}" style="margin-bottom: 0;">
+                                    <option value="crypto" ${p.category === 'crypto' ? 'selected' : ''}>Crypto</option>
+                                    <option value="sports" ${p.category === 'sports' ? 'selected' : ''}>Sports</option>
+                                    <option value="politics" ${p.category === 'politics' ? 'selected' : ''}>Politics</option>
+                                    <option value="science" ${p.category === 'science' ? 'selected' : ''}>Science</option>
+                                    <option value="entertainment" ${p.category === 'entertainment' ? 'selected' : ''}>Entertainment</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1; min-width: 150px;">
+                                <label style="color: var(--text-muted); font-size: 0.75rem;">Resolution Date</label>
+                                <input type="date" class="admin-notes-input" id="date-${p.id}" value="${p.resolution_date.split('T')[0]}" style="margin-bottom: 0;">
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: var(--space-md);">
+                            <label style="color: var(--text-muted); font-size: 0.75rem;">Admin Notes (shown to user if rejected)</label>
+                            <input type="text" class="admin-notes-input" id="notes-${p.id}" placeholder="Optional admin notes..." style="margin-bottom: 0;">
+                        </div>
+                        
                         <div class="proposal-actions">
-                            <button class="btn btn-yes" onclick="reviewProposal(${p.id}, 'approve')">✓ Approve</button>
+                            <button class="btn btn-yes" onclick="reviewProposal(${p.id}, 'approve')">✓ Approve (with edits)</button>
                             <button class="btn btn-no" onclick="reviewProposal(${p.id}, 'reject')">✗ Reject</button>
                         </div>
                     </div>
@@ -183,13 +209,21 @@
 
         async function reviewProposal(proposalId, action) {
             const notes = document.getElementById(`notes-${proposalId}`).value;
+            const title = document.getElementById(`title-${proposalId}`).value;
+            const description = document.getElementById(`desc-${proposalId}`).value;
+            const category = document.getElementById(`category-${proposalId}`).value;
+            const resolutionDate = document.getElementById(`date-${proposalId}`).value;
 
             try {
                 const response = await apiRequest(`/proposals/admin/${proposalId}/review`, {
                     method: 'POST',
                     body: JSON.stringify({
                         action: action,
-                        admin_notes: notes || null
+                        admin_notes: notes || null,
+                        title: title,
+                        description: description || null,
+                        category: category,
+                        resolution_date: resolutionDate + 'T23:59:59'
                     })
                 });
 
@@ -208,7 +242,7 @@
                         '<p class="empty-state">✅ No pending proposals. All caught up!</p>';
                 }
 
-                alert(`Proposal ${action === 'approve' ? 'approved ✓' : 'rejected ✗'}`);
+                alert(`Proposal ${action === 'approve' ? 'approved ✓ Market created!' : 'rejected ✗'}`);
 
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -224,23 +258,44 @@
 
         // Check if admin on load
         document.addEventListener('DOMContentLoaded', async () => {
-            if (!TokenManager.isLoggedIn()) {
+            console.log('Admin page loaded');
+            console.log('TokenManager available:', typeof TokenManager !== 'undefined');
+            console.log('Is logged in:', TokenManager?.isLoggedIn?.());
+
+            if (!TokenManager || !TokenManager.isLoggedIn()) {
+                console.log('Not logged in, redirecting...');
                 window.location.href = '/';
                 return;
             }
 
-            // Load current user to check admin status
-            const response = await apiRequest('/auth/me');
-            if (response.ok) {
-                const user = await response.json();
-                if (!user.is_admin) {
-                    document.getElementById('proposals-list').innerHTML =
-                        '<p class="empty-state">⛔ Access denied. Admin privileges required.</p>';
-                    return;
-                }
-            }
+            try {
+                // Load current user to check admin status
+                console.log('Checking admin status...');
+                const response = await apiRequest('/auth/me');
+                console.log('Response status:', response.status);
 
-            loadPendingProposals();
+                if (response.ok) {
+                    const user = await response.json();
+                    console.log('User:', user.username, 'is_admin:', user.is_admin);
+
+                    if (!user.is_admin) {
+                        document.getElementById('proposals-list').innerHTML =
+                            '<p class="empty-state">⛔ Access denied. Admin privileges required.</p>';
+                        return;
+                    }
+
+                    console.log('Loading proposals...');
+                    loadPendingProposals();
+                } else {
+                    console.log('Failed to get user info');
+                    document.getElementById('proposals-list').innerHTML =
+                        '<p class="empty-state">Failed to verify admin status. Please login again.</p>';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('proposals-list').innerHTML =
+                    `<p class="empty-state">Error: ${error.message}</p>`;
+            }
         });
     </script>
 </body>

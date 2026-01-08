@@ -36,7 +36,7 @@ async function initApp() {
         await refreshUserData();
     }
 
-    console.log('✅ PolyIITB ready!');
+    console.log('PolyIITB ready!');
 }
 
 // Seed data for development

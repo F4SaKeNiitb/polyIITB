@@ -85,6 +85,8 @@
             <h2 class="section-title">Popular Markets</h2>
             <div class="header-actions">
                 <div class="category-filters">
+                    <button class="btn btn-primary" id="create-market-btn" onclick="showCreateMarketModal()"
+                        style="display: none;">+ Create Market</button>
                     <button class="filter-btn active" data-category="all">All</button>
                     <button class="filter-btn" data-category="crypto">Crypto</button>
                     <button class="filter-btn" data-category="sports">Sports</button>
@@ -92,8 +94,6 @@
                     <button class="filter-btn" data-category="science">Science</button>
                     <button class="filter-btn" data-category="entertainment">Entertainment</button>
                 </div>
-                <button class="btn btn-primary" id="create-market-btn" onclick="showCreateMarketModal()"
-                    style="display: none;">+ Create Market</button>
             </div>
         </div>
         <div class="markets-grid" id="markets-grid">

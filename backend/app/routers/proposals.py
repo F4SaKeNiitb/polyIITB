@@ -116,13 +116,20 @@ async def review_proposal(
         final_title = review.title or proposal.title
         final_description = review.description if review.description is not None else proposal.description
         final_category = review.category or proposal.category
+        final_resolution_date = review.resolution_date or proposal.resolution_date
+        
+        # Update proposal with any modifications (for record keeping)
+        proposal.title = final_title
+        proposal.description = final_description
+        proposal.category = final_category
+        proposal.resolution_date = final_resolution_date
         
         # Create the actual market
         market = Market(
             title=final_title,
             description=final_description,
             category=final_category,
-            resolution_date=proposal.resolution_date,
+            resolution_date=final_resolution_date,
             yes_price=0.5,
             no_price=0.5
         )

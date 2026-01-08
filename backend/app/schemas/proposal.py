@@ -38,3 +38,4 @@ class ProposalReview(BaseModel):
     title: Optional[str] = Field(None, min_length=10, max_length=200)
     description: Optional[str] = Field(None, max_length=2000)
     category: Optional[str] = Field(None, min_length=1, max_length=50)
+    resolution_date: Optional[datetime] = None
