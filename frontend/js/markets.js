@@ -232,7 +232,7 @@ function renderMarketDetail() {
                                         <span style="color: ${order.order_type === 'buy' ? 'var(--yes-color)' : 'var(--no-color)'}; font-weight: 500;">
                                             ${escapeHtml(order.order_type.toUpperCase())} ${order.quantity} ${escapeHtml(order.side.toUpperCase())}
                                         </span>
-                                        <span style="color: var(--text-muted);">$${order.total_cost.toFixed(2)}</span>
+                                        <span style="color: var(--text-muted);">${order.total_cost.toFixed(2)}</span>
                                     </div>
                                 `).join('')}
                             </div>
