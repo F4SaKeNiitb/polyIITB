@@ -89,7 +89,7 @@ async def seed_database():
                 email="admin@polyiitb.com",
                 username="admin",
                 hashed_password=get_password_hash("admin123"),
-                balance=100000,  # 100,000 coins for admin
+                balance=100000000,  # 100,000,000 coins for admin
                 is_admin=True,
                 referral_code="ADMIN001"
             )
