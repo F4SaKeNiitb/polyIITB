@@ -148,12 +148,16 @@ function renderMarketDetail() {
     const yesPercent = Math.round(market.yes_price * 100);
     const noPercent = Math.round(market.no_price * 100);
     const isLoggedIn = TokenManager.isLoggedIn();
+    const isAdmin = TokenManager.getUser()?.is_admin || false;
     const hasPosition = currentUserPosition && (currentUserPosition.yes_shares > 0 || currentUserPosition.no_shares > 0);
     const hasOrders = currentMarketOrders.length > 0;
 
     document.getElementById('market-detail').innerHTML = `
         <div class="market-detail-header">
-            <span class="market-detail-category">${escapeHtml(market.category)}</span>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <span class="market-detail-category">${escapeHtml(market.category)}</span>
+                ${isAdmin ? `<button class="btn btn-outline" style="color: var(--danger); border-color: var(--danger); font-size: 0.75rem; padding: 4px 12px;" onclick="deleteMarket(${market.id})">🗑️ Delete</button>` : ''}
+            </div>
             <h2 class="market-detail-title">${escapeHtml(market.title)}</h2>
             ${market.description ? `<p class="market-detail-description">${escapeHtml(market.description)}</p>` : ''}
         </div>
@@ -366,8 +370,33 @@ function updateCreateMarketButton() {
     }
 }
 
+// Delete market (admin only)
+async function deleteMarket(marketId) {
+    if (!confirm('Are you sure you want to delete this market? This will also delete all orders and positions.')) {
+        return;
+    }
+
+    try {
+        const response = await apiRequest(`/markets/${marketId}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to delete market');
+        }
+
+        const result = await response.json();
+        closeMarketModal();
+        showToast(result.message, 'success');
+        await loadMarkets();
+
+    } catch (error) {
+        showToast('Error: ' + error.message, 'error');
+    }
+}
+
 // Call on page load and auth state changes
 document.addEventListener('DOMContentLoaded', () => {
     updateCreateMarketButton();
 });
-

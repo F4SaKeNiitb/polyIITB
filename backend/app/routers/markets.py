@@ -106,3 +106,33 @@ async def resolve_market(
         "message": f"Market resolved as {resolution.outcome.upper()}",
         "settled_positions": settled_count
     }
+
+
+@router.delete("/{market_id}", status_code=status.HTTP_200_OK)
+async def delete_market(
+    market_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_admin_user)
+):
+    """Delete a market (admin only). Also deletes related orders and positions."""
+    from ..models.order import Order
+    from ..models.position import Position
+    
+    market = get_market(db, market_id)
+    if not market:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Market not found"
+        )
+    
+    # Delete related orders first
+    db.query(Order).filter(Order.market_id == market_id).delete()
+    
+    # Delete related positions
+    db.query(Position).filter(Position.market_id == market_id).delete()
+    
+    # Delete the market
+    db.delete(market)
+    db.commit()
+    
+    return {"message": f"Market '{market.title}' deleted successfully"}
